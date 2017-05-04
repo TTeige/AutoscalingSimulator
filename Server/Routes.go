@@ -22,17 +22,26 @@ var routes = Routes{
 	Route{
 		"Resource",
 		"GET",
-		"/resource/{id}",
+		"/resource/{name}",
 		queryResource,
 	},
 
 	Route{
 		"Job",
 		"GET",
-		"/job/{id}",
+		"/job/{name}",
 		queryJob,
 	},
+	Route{
+		"AllocateResource",
+		"GET",
+		"/allocateResource",
+		allocateResource,
+	},
+	Route{
+		"RemoveResource",
+		"POST",
+		"/removeResource/{name}",
+		removeResource,
+	},
 }
-//r.HandleFunc("/", handleRoot).Methods("POST").Headers("Content-Type", "application/xml")
-//r.HandleFunc("/resource/{id}", queryResource).Methods("GET")
-//r.HandleFunc("/job/{id}", queryJob).Methods("GET")

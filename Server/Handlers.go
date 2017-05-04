@@ -10,6 +10,8 @@ import (
 
 var xmlData xmlx.Document
 
+//Might have to do a basic read from the file system for the queue data or through a GET request to the platform
+//might not be transmitted to the "master node" in the scaling algorithm
 func handleRoot(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		if r.Header.Get("Content-Type") == "application/xml" {
@@ -25,6 +27,7 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				fmt.Printf("Error reading xml data: %s\n", err)
 			}
+			fmt.Println("Connection wrote queue data to server" + xmlData.String())
 			io.WriteString(w, xmlData.String())
 
 		}
@@ -44,5 +47,13 @@ func queryResource(w http.ResponseWriter, r *http.Request) {
 }
 
 func queryJob(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func allocateResource(w http.ResponseWriter, r *http.Request) {
+	
+}
+
+func removeResource(w http.ResponseWriter, r *http.Request) {
 
 }
