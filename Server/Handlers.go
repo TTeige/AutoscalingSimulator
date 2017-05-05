@@ -7,6 +7,8 @@ import (
 	"log"
 )
 
+var GlobalQueue JobQueue
+
 //Might have to do a basic read from the file system for the queue data or through a GET request to the platform
 //might not be transmitted to the "master node" in the scaling algorithm
 func handleRoot(w http.ResponseWriter, r *http.Request) {
@@ -18,7 +20,7 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 		}
 		if r.Header.Get("Content-Type") == "application/xml" {
 
-			queue, err := parseQueueData(body, "application/xml")
+			GlobalQueue, err = parseData(body, "application/xml")
 
 			if err != nil {
 				fmt.Printf("Error reading xml data: %s\n", err)
@@ -26,23 +28,13 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			for _, v := range queue.JobMap {
-				fmt.Printf("%s, %s, %f, %t\n",v.Name, v.Platform, v.Duration, v.Allocating)
-				for _, v2 := range v.Resources {
-					fmt.Printf("%s\n", v2.Name)
-				}
-			}
-
 		}
 		if r.Header.Get("Content-Type") == "application/json" {
-			fmt.Println("Got request")
-			queue, err := parseQueueData(body, "application/json")
+			GlobalQueue, err = parseData(body, "application/json")
 			if err != nil {
 				fmt.Printf("Error reading json data: %s\n", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-			for _, v := range queue.JobMap {
-				fmt.Printf("Job name from json is: %s\n", v.Name)
+				return
 			}
 		}
 	}
@@ -52,7 +44,6 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 
 func queryResource(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("GET requestURI: ", r.RequestURI)
-	//resourceID := r.URL.Query().Get("id")
 }
 
 func queryJob(w http.ResponseWriter, r *http.Request) {

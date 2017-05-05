@@ -5,8 +5,8 @@ import (
 	"go-pkg-xmlx"
 	"encoding/json"
 )
-//TODO: Something wrong with json parsing
-func parseQueueData(data []byte, dataType string) (JobQueue, error) {
+
+func parseData(data []byte, dataType string) (JobQueue, error) {
 	var xmlData xmlx.Document
 
 	var err error
@@ -41,15 +41,43 @@ func parseQueueData(data []byte, dataType string) (JobQueue, error) {
 			}
 			queue.JobMap[job.Name] = job
 		}
-		break
+		return queue, nil
 	case "application/json":
+		//Struct only needed to parse json
+		type _parsed struct {
+			Jobs []struct {
+				Name      string `json:"name"`
+				Platform  string `json:"platform"`
+				Duration  float64 `json:"duration"`
+				Resources []struct {
+					Name string `json:"name"`
+				} `json:"resources"`
+			} `json:"MetaJobs"`
+		}
+		var parsed _parsed
 		//Queue is locked in case some requests come in for scaling before the actual queue is created.
+		if err = json.Unmarshal(data, &parsed); err != nil {
+			panic(err)
+		}
 		queue.Lock.Lock()
 		defer queue.Lock.Unlock()
-		err = json.Unmarshal(data, &queue)
-		break
+		if queue.JobMap == nil {
+			queue.JobMap = make(map[string]Job)
+		}
+		for _, v := range parsed.Jobs {
+			//Create the Job in the in memory struct
+			queue.JobMap[v.Name] = Job{Name:v.Name,
+				Platform:v.Platform,
+				Duration:v.Duration,
+				Resources:make(map[string]Resource)}
+
+			for _, r := range v.Resources {
+				queue.JobMap[v.Name].Resources[r.Name] = Resource{Name:r.Name}
+			}
+		}
+		return queue, nil
 	default:
-		break
+		//Returns an invalid struct
+		return nil, err
 	}
-	return queue, err
 }
