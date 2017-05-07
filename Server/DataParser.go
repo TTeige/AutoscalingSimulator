@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 )
 
+//Parses the input data in either xml format or json
+//Can easily be updated to accommodate a different structure of the data. The given data below is just for testing purposes
 func parseData(data []byte, dataType string) (JobQueue, error) {
 	var xmlData xmlx.Document
 
@@ -78,6 +80,6 @@ func parseData(data []byte, dataType string) (JobQueue, error) {
 		return queue, nil
 	default:
 		//Returns an invalid struct
-		return nil, err
+		return queue, err
 	}
 }
