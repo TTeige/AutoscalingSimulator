@@ -14,7 +14,7 @@ func ParseData(data []byte, dataType string) (JobQueue, error) {
 	var err error
 	var queue JobQueue
 	switch dataType {
-	case "application/xml":
+	case "xml":
 		err = xmlData.LoadBytes(data, nil)
 		if err != nil {
 			fmt.Println("Error while parsing xml Queue data: ", err)
@@ -44,7 +44,7 @@ func ParseData(data []byte, dataType string) (JobQueue, error) {
 			queue.JobMap[job.Name] = job
 		}
 		return queue, nil
-	case "application/json":
+	case "json":
 		//Struct only needed to parse json
 		type _parsed struct {
 			Jobs []struct {

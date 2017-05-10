@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"encoding/json"
 	"AutoscalingSimulator/JobQueue"
+	"strings"
 )
 
 var GlobalQueue JobQueue.JobQueue
@@ -21,20 +22,12 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 			fmt.Printf("Error while parsing the body to bytes: %s", err)
 			log.Fatal(err)
 		}
-		if r.Header.Get("Content-Type") == "application/xml" {
-
-			GlobalQueue, err = JobQueue.ParseData(body, "application/xml")
+		if r.Header.Get("Content-Type") == "application/xml" || r.Header.Get("Content-Type") == "application/json" {
+			contentType := strings.Split(r.Header.Get("Content-Type"), "/")
+			GlobalQueue, err = JobQueue.ParseData(body, contentType[len(contentType)-1])
 
 			if err != nil {
-				fmt.Printf("Error reading xml data: %s\n", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-		} else if r.Header.Get("Content-Type") == "application/json" {
-			GlobalQueue, err = JobQueue.ParseData(body, "application/json")
-			if err != nil {
-				fmt.Printf("Error reading json data: %s\n", err)
+				fmt.Printf("Error reading data: %s\n", err)
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}

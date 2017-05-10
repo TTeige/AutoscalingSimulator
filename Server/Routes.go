@@ -1,6 +1,9 @@
 package server
 
-import "net/http"
+import (
+	"net/http"
+	"AutoscalingSimulator/InternalScaling"
+)
 
 type Route struct {
 	Name        string
@@ -13,7 +16,7 @@ type Route struct {
 
 type Routes []Route
 
-var routes = Routes{
+var APIRoutes = Routes{
 	Route{
 		"Index",
 		//[]string{"POST", "GET"},
@@ -61,5 +64,15 @@ var routes = Routes{
 		"GET",
 		"/job/{name}/all",
 		getAllResources,
+	},
+}
+
+//Routes for the internal simulator
+var InternalRoutes = Routes {
+	Route{
+		"Index",
+		"GET",
+		"/",
+		InternalScaling.HandleSimView,
 	},
 }
