@@ -1,4 +1,4 @@
-package server
+package JobQueue
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 
 //Parses the input data in either xml format or json
 //Can easily be updated to accommodate a different structure of the data. The given data below is just for testing purposes
-func parseData(data []byte, dataType string) (JobQueue, error) {
+func ParseData(data []byte, dataType string) (JobQueue, error) {
 	var xmlData xmlx.Document
 
 	var err error
@@ -27,7 +27,7 @@ func parseData(data []byte, dataType string) (JobQueue, error) {
 			var job Job
 			job.Name = node.As("", "name")
 			job.Allocating = false
-			job.Duration = node.F64("", "Duration")
+			job.Duration = node.U64("", "Duration")
 			job.Platform = node.As("", "platform")
 			children := node.SelectNodesDirect("", "Node")
 			for _, child := range children {
@@ -50,7 +50,7 @@ func parseData(data []byte, dataType string) (JobQueue, error) {
 			Jobs []struct {
 				Name      string `json:"name"`
 				Platform  string `json:"platform"`
-				Duration  float64 `json:"duration"`
+				Duration  uint64 `json:"duration"`
 				Resources []struct {
 					Name string `json:"name"`
 				} `json:"resources"`

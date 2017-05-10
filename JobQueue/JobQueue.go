@@ -1,17 +1,17 @@
-package server
+package JobQueue
 
 import "sync"
 
 type Job struct {
-	Name       string
-	Platform   string
-	Duration   float64
-	Allocating bool
-	Resources  map[string]Resource
+	Name       string `json:"name"`
+	Platform   string `json:"platform"`
+	Duration   uint64 `json:"duration"`
+	Allocating bool `json:"allocating"`
+	Resources  map[string]Resource `json:"resources"`
 }
 
 type Resource struct {
-	Name string
+	Name string `json:"name"`
 }
 
 type JobQueue struct {
