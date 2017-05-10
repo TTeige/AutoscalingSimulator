@@ -15,7 +15,7 @@ var GlobalQueue JobQueue.JobQueue
 
 //Might have to do a basic read from the file system for the queue data or through a GET request to the platform
 //might not be transmitted to the "master node" in the scaling algorithm
-func handleRoot(w http.ResponseWriter, r *http.Request) {
+func Index(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -42,7 +42,7 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 //Simulator checks the a resource by generating a struct populated with variables and statuses
 // within reasonable limits of a real world case
 //TODO: Query the actual resource
-func queryResource(w http.ResponseWriter, r *http.Request) {
+func QueryResource(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("GET requestURI: ", r.RequestURI)
 	vars := mux.Vars(r)
 	w.WriteHeader(200)
@@ -59,7 +59,7 @@ func queryResource(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func queryJob(w http.ResponseWriter, r *http.Request) {
+func QueryJob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	job := GlobalQueue.JobMap[vars["name"]]
 	data, err := json.Marshal(&job)
@@ -74,14 +74,14 @@ func queryJob(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func allocateResource(w http.ResponseWriter, r *http.Request) {
+func AllocateResource(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func removeResource(w http.ResponseWriter, r *http.Request) {
+func RemoveResource(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func getAllResources(w http.ResponseWriter, r *http.Request) {
+func GetAllResources(w http.ResponseWriter, r *http.Request) {
 
 }

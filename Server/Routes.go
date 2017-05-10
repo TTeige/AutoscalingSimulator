@@ -23,7 +23,7 @@ var APIRoutes = Routes{
 		"POST",
 		"/",
 		//[]string{"Content-Type", "application/json", "Content-Type", "application/xml"},
-		handleRoot,
+		Index,
 	},
 
 	Route{
@@ -32,7 +32,7 @@ var APIRoutes = Routes{
 		"GET",
 		"/job/{jname}/resource/{rname}/",
 		//[]string{},
-		queryResource,
+		QueryResource,
 	},
 
 	Route{
@@ -41,7 +41,7 @@ var APIRoutes = Routes{
 		"GET",
 		"/job/{name}/",
 		//[]string{},
-		queryJob,
+		QueryJob,
 	},
 	Route{
 		"AllocateResource",
@@ -49,7 +49,7 @@ var APIRoutes = Routes{
 		"GET",
 		"/job/{name}/allocate/",
 		//[]string{},
-		allocateResource,
+		AllocateResource,
 	},
 	Route{
 		"RemoveResource",
@@ -57,13 +57,13 @@ var APIRoutes = Routes{
 		"GET",
 		"/job/{name}/remove/",
 		//[]string{},
-		removeResource,
+		RemoveResource,
 	},
 	Route {
 		"AllResources",
 		"GET",
 		"/job/{name}/all",
-		getAllResources,
+		GetAllResources,
 	},
 }
 
