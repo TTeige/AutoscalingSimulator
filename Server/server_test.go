@@ -9,7 +9,17 @@ import (
 	"strings"
 )
 
+var (
+	ts *httptest.Server
+)
+
+func init() {
+	ts = httptest.NewServer(server.NewRouter(server.APIRoutes))
+}
+
 func TestIndex(t *testing.T) {
+	//Testing JSON
+	t.Log("Testing JSON Data")
 	data := `{
 		  "MetaJobs": [
 		    {
@@ -49,22 +59,38 @@ func TestIndex(t *testing.T) {
 		    }
 		  ]
 		}`
-	buf := strings.NewReader(data)
-	ts := httptest.NewServer(server.NewRouter(server.APIRoutes))
+	data_string := strings.NewReader(data)
 	defer ts.Close()
-	resp, err := http.Post(ts.URL, "application/json", buf)
+	resp, err := http.Post(ts.URL, "application/json", data_string)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	resp_res, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		t.Fatal(err)
-		t.Errorf("Error while reading response, tried to read: %s", resp_res)
+		t.Errorf("Error while reading response, tried to read: %s\nError: %s", resp_res, err)
 	}
 	if status := resp.StatusCode; status != http.StatusOK {
 		t.Errorf("Wrong response code received, got %v, expected %v", resp.StatusCode, http.StatusOK)
 	}
+	t.Log("Testing invalid JSON data")
+	data = `This should fail hard`
+	data_string = strings.NewReader(data)
+	resp, err = http.Post(ts.URL, "application/json", data_string)
+	if err != nil {
+		t.Error(err)
+	}
+	resp_res, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Errorf("Error while reading response, tried to read: %s\nError: %s", resp_res, err)
+	}
+	if status := resp.StatusCode; status != http.StatusBadRequest {
+		t.Errorf("Wrong response code received, got %v, expected %v", resp.StatusCode,
+			http.StatusBadRequest)
+	}
 
+
+	//Testing XML
+	t.Log("Testing XML data")
 	data = `<?xml version="1.0" encoding="UTF-8" ?>
 	<Data>
 	    <MetaJob name="test" platform="stallo">
@@ -90,17 +116,49 @@ func TestIndex(t *testing.T) {
 	    </MetaJob>
 	</Data>
 	`
-	resp, err = http.Post(ts.URL, "application/xml", buf)
+	data_string = strings.NewReader(data)
+	resp, err = http.Post(ts.URL, "application/xml", data_string)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 	resp_res, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
-		t.Fatal(err)
-		t.Errorf("Error while reading response, tried to read: %s", resp_res)
+		t.Errorf("Error while reading response, tried to read: %s\nError: %s", resp_res, err.Error())
 	}
 	if status := resp.StatusCode; status != http.StatusOK {
 		t.Errorf("Wrong response code received, got %v, expected %v", resp.StatusCode, http.StatusOK)
+	}
+
+	t.Log("Testing invalid XML data")
+	data = `This should fail hard`
+	data_string = strings.NewReader(data)
+	resp, err = http.Post(ts.URL, "application/xml", data_string)
+	if err != nil {
+		t.Error(err)
+	}
+	resp_res, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Errorf("Error while reading response, tried to read: %s\nError: %s", resp_res, err.Error())
+	}
+	if status := resp.StatusCode; status != http.StatusBadRequest {
+		t.Errorf("Wrong response code received, got %v, expected %v", resp.StatusCode,
+			http.StatusBadRequest)
+	}
+
+	t.Log("Testing invalid media type")
+	data = `This should fail hard`
+	data_string = strings.NewReader(data)
+	resp, err = http.Post(ts.URL, "application/fail", data_string)
+	if err != nil {
+		t.Error(err)
+	}
+	resp_res, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Errorf("Error while reading response, tried to read: %s\nError: %s", resp_res, err.Error())
+	}
+	if status := resp.StatusCode; status != http.StatusUnsupportedMediaType {
+		t.Errorf("Wrong response code received, got %v, expected %v", resp.StatusCode,
+			http.StatusUnsupportedMediaType)
 	}
 }
 

@@ -3,12 +3,12 @@ package server
 import (
 	"net/http"
 	"io/ioutil"
-	"fmt"
 	"log"
 	"github.com/gorilla/mux"
 	"encoding/json"
 	"AutoscalingSimulator/JobQueue"
 	"strings"
+	"errors"
 )
 
 var GlobalQueue JobQueue.JobQueue
@@ -19,35 +19,36 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			fmt.Printf("Error while parsing the body to bytes: %s", err)
-			log.Fatal(err)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			log.Print(err)
 		}
-		if r.Header.Get("Content-Type") == "application/xml" || r.Header.Get("Content-Type") == "application/json" {
+		if r.Header.Get("Content-Type") == "application/xml" ||
+			r.Header.Get("Content-Type") == "application/json" {
+
 			contentType := strings.Split(r.Header.Get("Content-Type"), "/")
-			GlobalQueue, err = JobQueue.ParseData(body, contentType[len(contentType)-1])
+			GlobalQueue, err = JobQueue.ParseData(body, contentType[len(contentType) - 1])
 
 			if err != nil {
-				fmt.Printf("Error reading data: %s\n", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				log.Print(err)
 				return
 			}
 		} else {
-			w.WriteHeader(http.StatusUnprocessableEntity)
+			err = errors.New("Unsuported data type")
+			http.Error(w, err.Error(), http.StatusUnsupportedMediaType)
+			log.Print(err)
 			return
 		}
 	}
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Scaling request received from algorithm\n"))
 }
 //Simulator checks the a resource by generating a struct populated with variables and statuses
 // within reasonable limits of a real world case
 //TODO: Query the actual resource
 func QueryResource(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("GET requestURI: ", r.RequestURI)
 	vars := mux.Vars(r)
 	w.WriteHeader(200)
 	res := GlobalQueue.JobMap[vars["jname"]].Resources[vars["rname"]]
-	fmt.Printf("Resname: %s\n", res.Name)
 	data, err := json.Marshal(&res)
 	if err != nil {
 		log.Fatal(err)

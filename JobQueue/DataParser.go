@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"go-pkg-xmlx"
 	"encoding/json"
+	"log"
+	"errors"
 )
 
 //Parses the input data in either xml format or json
@@ -43,7 +45,10 @@ func ParseData(data []byte, dataType string) (JobQueue, error) {
 			}
 			queue.JobMap[job.Name] = job
 		}
-		return queue, nil
+		if len(queue.JobMap) == 0 {
+			return queue, errors.New("XML data did not parse into the Job Queue")
+		}
+		return queue, err
 	case "json":
 		//Struct only needed to parse json
 		type _parsed struct {
@@ -59,7 +64,8 @@ func ParseData(data []byte, dataType string) (JobQueue, error) {
 		var parsed _parsed
 		//Queue is locked in case some requests come in for scaling before the actual queue is created.
 		if err = json.Unmarshal(data, &parsed); err != nil {
-			panic(err)
+			log.Print(err)
+			return queue, err
 		}
 		queue.Lock.Lock()
 		defer queue.Lock.Unlock()
@@ -77,7 +83,7 @@ func ParseData(data []byte, dataType string) (JobQueue, error) {
 				queue.JobMap[v.Name].Resources[r.Name] = Resource{Name:r.Name}
 			}
 		}
-		return queue, nil
+		return queue, err
 	default:
 		//Returns an invalid struct
 		return queue, err
