@@ -44,18 +44,22 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 //Simulator checks the a resource by generating a struct populated with variables and statuses
 // within reasonable limits of a real world case
-//TODO: Query the actual resource
+// if requested resource does not exist, returns an empty json object of the JobQueue.Resource type
 func QueryResource(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	w.WriteHeader(200)
-	res := GlobalQueue.JobMap[vars["jname"]].Resources[vars["rname"]]
+	res, ok := GlobalQueue.JobMap[vars["jname"]].Resources[vars["rname"]]
+	if ok {
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+	}
 	data, err := json.Marshal(&res)
 	if err != nil {
 		log.Fatal(err)
 	}
 	i, err := w.Write([]byte(data))
 	if err != nil {
-		log.Println(err)
+		log.Print(err)
 		log.Printf("Number of bytes written to output: %d\n", i)
 	}
 }

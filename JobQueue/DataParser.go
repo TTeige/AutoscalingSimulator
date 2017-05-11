@@ -19,7 +19,8 @@ func ParseData(data []byte, dataType string) (JobQueue, error) {
 	case "xml":
 		err = xmlData.LoadBytes(data, nil)
 		if err != nil {
-			fmt.Println("Error while parsing xml Queue data: ", err)
+			log.Print(err)
+			return queue, err
 		}
 		nodes := xmlData.SelectNodes("", "MetaJob")
 		//Locking queue in case a request is processed before the queue is created
