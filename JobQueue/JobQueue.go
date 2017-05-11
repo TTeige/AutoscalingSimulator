@@ -5,7 +5,7 @@ import "sync"
 type Job struct {
 	Name       string `json:"name"`
 	Platform   string `json:"platform"`
-	Duration   uint64 `json:"duration"`
+	Duration   int `json:"duration"`
 	Allocating bool `json:"allocating"`
 	Resources  map[string]Resource `json:"resources"`
 }

@@ -1,7 +1,6 @@
 package JobQueue
 
 import (
-	"fmt"
 	"go-pkg-xmlx"
 	"encoding/json"
 	"log"
@@ -30,7 +29,7 @@ func ParseData(data []byte, dataType string) (JobQueue, error) {
 			var job Job
 			job.Name = node.As("", "name")
 			job.Allocating = false
-			job.Duration = node.U64("", "Duration")
+			job.Duration = node.I("", "Duration")
 			job.Platform = node.As("", "platform")
 			children := node.SelectNodesDirect("", "Node")
 			for _, child := range children {
@@ -56,7 +55,7 @@ func ParseData(data []byte, dataType string) (JobQueue, error) {
 			Jobs []struct {
 				Name      string `json:"name"`
 				Platform  string `json:"platform"`
-				Duration  uint64 `json:"duration"`
+				Duration  int `json:"duration"`
 				Resources []struct {
 					Name string `json:"name"`
 				} `json:"resources"`
