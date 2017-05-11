@@ -176,13 +176,16 @@ func TestQueryResource(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Received wrong response code, got %v, expected %v", resp.StatusCode, http.StatusOK)
+	}
 	r := JobQueue.Resource{}
 	err = json.NewDecoder(resp.Body).Decode(&r)
 	if err != nil {
 		t.Error(err)
 	}
 	if r.Name != "1" {
-		t.Errorf("%s, received %s",errors.New("Did not receive requested resource"), r.Name)
+		t.Errorf("%s, received %s", errors.New("Did not receive requested resource"), r.Name)
 	}
 
 	t.Log("Testing for invalid resource")
@@ -190,12 +193,100 @@ func TestQueryResource(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	if resp.StatusCode != http.StatusNotFound {
+		t.Errorf("Received wrong response code, got %v, expected %v", resp.StatusCode, http.StatusNotFound)
+	}
 	r = JobQueue.Resource{}
 	err = json.NewDecoder(resp.Body).Decode(&r)
 	if err != nil {
 		t.Error(err)
 	}
 	if r.Name != "" {
-		t.Errorf("%s, received %s",errors.New("Did not receive requested resource"), r.Name)
+		t.Errorf("%s, received %s", errors.New("Did not receive requested resource"), r.Name)
+	}
+	t.Log("Testing for invalid job for resource")
+	resp, err = http.Get(ts.URL + "/job/q/resource/1/")
+	if err != nil {
+		t.Error(err)
+	}
+	if resp.StatusCode != http.StatusNotFound {
+		t.Errorf("Received wrong response code, got %v, expected %v", resp.StatusCode, http.StatusNotFound)
+	}
+	r = JobQueue.Resource{}
+	err = json.NewDecoder(resp.Body).Decode(&r)
+	if err != nil {
+		t.Error(err)
+	}
+	if r.Name != "" {
+		t.Errorf("%s, received %s", errors.New("Did not receive requested resource"), r.Name)
 	}
 }
+
+func TestQueryJob(t *testing.T) {
+	//Ensure the server has the data
+	data_string := strings.NewReader(json_data)
+	_, err := http.Post(ts.URL, "application/json", data_string)
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log("Requesting job")
+	resp, err := http.Get(ts.URL + "/job/test1/")
+	if err != nil {
+		t.Error(err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Received wrong response code, got %v, expected %v", resp.StatusCode, http.StatusOK)
+	}
+	j := JobQueue.Job{}
+	err = json.NewDecoder(resp.Body).Decode(&j)
+	if err != nil {
+		t.Error(err)
+	}
+	if j.Name != "test1" {
+		t.Errorf("Received wrong job, got: %s", j.Name)
+	}
+	if j.Duration != 10 {
+		t.Errorf("Wrong duration, got: %d", j.Duration)
+	}
+	if j.Allocating != false {
+		t.Errorf("Received wrong allocation variable, got: %t, expected false", j.Allocating)
+	}
+	if j.Platform != "stallo" {
+		t.Errorf("Received wrong platform, expected stallo, got: %s", j.Platform)
+	}
+	for k, v := range j.Resources {
+		if k != v.Name {
+			t.Errorf("Wrong name: %s for the resource %s", k, v.Name)
+		}
+	}
+
+
+	resp, err = http.Get(ts.URL + "/job/q/")
+	if err != nil {
+		t.Error(err)
+	}
+	if resp.StatusCode != http.StatusNotFound {
+		t.Errorf("Received wrong response code, got %v, expected %v", resp.StatusCode, http.StatusNotFound)
+	}
+	j = JobQueue.Job{}
+	err = json.NewDecoder(resp.Body).Decode(&j)
+	if err != nil {
+		t.Error(err)
+	}
+	if j.Name != "" {
+		t.Errorf("Received wrong job, got: %s", j.Name)
+	}
+	if j.Duration != 0 {
+		t.Errorf("Wrong duration, got: %d", j.Duration)
+	}
+	if j.Allocating != false {
+		t.Errorf("Received wrong allocation variable, got: %t, expected false", j.Allocating)
+	}
+	if j.Platform != "" {
+		t.Errorf("Received wrong platform, expected stallo, got: %s", j.Platform)
+	}
+	if j.Resources != nil {
+		t.Error("Received an initalized map")
+	}
+}
+

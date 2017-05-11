@@ -57,7 +57,7 @@ func QueryResource(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	i, err := w.Write([]byte(data))
+	i, err := w.Write(data)
 	if err != nil {
 		log.Print(err)
 		log.Printf("Number of bytes written to output: %d\n", i)
@@ -66,12 +66,16 @@ func QueryResource(w http.ResponseWriter, r *http.Request) {
 
 func QueryJob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	job := GlobalQueue.JobMap[vars["name"]]
+	job, ok := GlobalQueue.JobMap[vars["name"]]
+	if ok {
+		w.WriteHeader(http.StatusOK)
+	} else {
+		w.WriteHeader(http.StatusNotFound)
+	}
 	data, err := json.Marshal(&job)
 	if err != nil {
 		log.Fatal(err)
 	}
-	w.WriteHeader(http.StatusOK)
 	i, err := w.Write([]byte(data))
 	if err != nil {
 		log.Println(err)
