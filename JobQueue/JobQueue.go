@@ -25,7 +25,7 @@ type JobQueue struct {
 //Adds a resource to a given job
 //Returns true if the resource is not already in the map
 //Returns false if the resource exists for the job
-func (t *JobQueue) addResource(jobName string, resourceChan <-chan Resource) bool {
+func (t *JobQueue) AddResource(jobName string, resourceChan <-chan Resource) bool {
 	res := <-resourceChan
 	t.Lock.Lock()
 	defer t.Lock.Unlock()
@@ -39,7 +39,7 @@ func (t *JobQueue) addResource(jobName string, resourceChan <-chan Resource) boo
 //Remove specific resource from a given job
 //Returns true if the resource is removed
 //Returns false if the resource did not exist
-func (t *JobQueue) removeResource(jobName string, resourceName string) bool {
+func (t *JobQueue) RemoveResource(jobName string, resourceName string) bool {
 	t.Lock.Lock()
 	defer t.Lock.Unlock()
 	if _, ok := t.JobMap[jobName].Resources[resourceName]; ok {
@@ -51,7 +51,7 @@ func (t *JobQueue) removeResource(jobName string, resourceName string) bool {
 
 //Remove an entire job from the Queue
 //Returns true if the job existed
-func (t *JobQueue) removeJob(jobName string) bool {
+func (t *JobQueue) RemoveJob(jobName string) bool {
 	t.Lock.Lock()
 	defer t.Lock.Unlock()
 	if _, ok := t.JobMap[jobName]; ok {
@@ -65,12 +65,32 @@ func (t *JobQueue) removeJob(jobName string) bool {
 //Test to see if the resource specified exists for the given job
 //Returns true if the resource exists
 //Returns false if the resource did not exist for the job
-func (t *JobQueue) testForResource(jobName string, resourceName string) bool {
+func (t *JobQueue) TestForResource(jobName string, resourceName string) bool {
 	t.Lock.RLock()
 	defer t.Lock.RUnlock()
 	if _, ok := t.JobMap[jobName].Resources[resourceName]; ok {
 		return ok
 	} else {
 		return false
+	}
+}
+
+func (t *JobQueue) GetResource(jobName string, resourceName string) (Resource, bool) {
+	t.Lock.RLock()
+	defer t.Lock.RUnlock()
+	if v, ok := t.JobMap[jobName].Resources[resourceName]; ok {
+		return v, ok
+	} else {
+		return Resource{}, false
+	}
+}
+
+func (t *JobQueue) GetJob(jobName string) (Job, bool) {
+	t.Lock.RLock()
+	defer t.Lock.RUnlock()
+	if v, ok := t.JobMap[jobName]; ok {
+		return v, ok
+	} else {
+		return Job{}, false
 	}
 }

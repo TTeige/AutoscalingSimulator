@@ -47,7 +47,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 // if requested resource does not exist, returns an empty json object of the JobQueue.Resource type
 func QueryResource(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	res, ok := GlobalQueue.JobMap[vars["jname"]].Resources[vars["rname"]]
+	res, ok := GlobalQueue.GetResource(vars["jname"], vars["rname"])
 	if ok {
 		w.WriteHeader(http.StatusOK)
 	} else {
@@ -66,7 +66,7 @@ func QueryResource(w http.ResponseWriter, r *http.Request) {
 
 func QueryJob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	job, ok := GlobalQueue.JobMap[vars["name"]]
+	job, ok := GlobalQueue.GetJob(vars["name"])
 	if ok {
 		w.WriteHeader(http.StatusOK)
 	} else {

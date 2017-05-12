@@ -22,9 +22,6 @@ func ParseData(data []byte, dataType string) (JobQueue, error) {
 			return queue, err
 		}
 		nodes := xmlData.SelectNodes("", "MetaJob")
-		//Locking queue in case a request is processed before the queue is created
-		queue.Lock.Lock()
-		defer queue.Lock.Unlock()
 		for _, node := range nodes {
 			var job Job
 			job.Name = node.As("", "name")
@@ -50,9 +47,6 @@ func ParseData(data []byte, dataType string) (JobQueue, error) {
 		}
 		return queue, err
 	case "json":
-		//Queue is locked in case some requests come in for scaling before the actual queue is created.
-		queue.Lock.Lock()
-		defer queue.Lock.Unlock()
 		if err = json.Unmarshal(data, &queue.JobMap); err != nil {
 			log.Print(err)
 			return queue, err
