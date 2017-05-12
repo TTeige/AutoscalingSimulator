@@ -15,43 +15,43 @@ import (
 var (
 	ts *httptest.Server
 	json_data = `{
-		  "MetaJobs": [
-		    {
-		      "name": "test1",
-		      "platform": "stallo",
-		      "duration": 10,
-		      "resources": [
-			{
-			  "name": "1"
-			},
-			{
-			  "name": "2"
-			},
-			{
-			  "name": "3"
-			},
-			{
-			  "name": "4"
-			},
-			{
-			  "name": "5"
-			}
-		      ]
-		    },
-		    {
-		      "name": "test2",
-		      "platform": "aws",
-		      "duration": 4,
-		      "resources": [
-			{
-			  "name": "6"
-			},
-			{
-			  "name": "7"
-			}
-		      ]
+		  "test1": {
+		    "name": "test1",
+		    "platform": "stallo",
+		    "duration": 10,
+		    "allocating": false,
+		    "resources": {
+		      "1": {
+			"name": "1"
+		      },
+		      "2": {
+			"name": "2"
+		      },
+		      "3": {
+			"name": "3"
+		      },
+		      "4": {
+			"name": "4"
+		      },
+		      "5": {
+			"name": "5"
+		      }
 		    }
-		  ]
+		  },
+		  "test2": {
+		    "name": "test2",
+		    "platform": "aws",
+		    "duration": 4,
+		    "allocating": false,
+		    "resources": {
+		      "6": {
+			"name": "6"
+		      },
+		      "7": {
+			"name": "7"
+		      }
+		    }
+		  }
 		}`
 	xml_data = `<?xml version="1.0" encoding="UTF-8" ?>
 	<Data>
@@ -259,7 +259,6 @@ func TestQueryJob(t *testing.T) {
 			t.Errorf("Wrong name: %s for the resource %s", k, v.Name)
 		}
 	}
-
 
 	resp, err = http.Get(ts.URL + "/job/q/")
 	if err != nil {

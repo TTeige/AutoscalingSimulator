@@ -53,7 +53,7 @@ func HandleSimView(w http.ResponseWriter, r *http.Request) {
 		"formatDate": formatDate,
 		"formatQueue": formatQueue,
 	}
-	templ := template.Must(template.New("SimResView.tmpl").Funcs(fmap).ParseFiles("resources/html/SimResView.tmpl"))
+	templ := template.Must(template.New("SimResView.html").Funcs(fmap).ParseFiles("resources/html/SimResView.html"))
 	templ.Execute(w, env)
 }
 
@@ -68,7 +68,7 @@ func formatQueue(q JobQueue.JobQueue) string {
 	return fmt.Sprintf("%+v", q.JobMap)
 }
 
-//Helper function to open the webbrowser when the algorithm has finished running
+//Helper function to open the web browser when the algorithm has finished running
 // open opens the specified URL in the default browser of the user.
 func openDefBrowser(url string) error {
 	var cmd string

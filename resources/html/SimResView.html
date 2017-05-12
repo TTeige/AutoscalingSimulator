@@ -1,0 +1,67 @@
+<html>
+<header>
+    <title>Simulator Result View</title>
+    <script>
+        var _queue = {{.Queue.JobMap}};
+        _queue = JSON.parse(_queue);
+    </script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {packages: ['corechart', 'table']});
+        google.charts.setOnLoadCallback(drawPieChart);
+        google.charts.setOnLoadCallback(drawTableChart);
+
+        function drawPieChart() {
+            // Define the chart to be drawn.
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Element');
+            data.addColumn('number', 'Percentage');
+            data.addRows([
+                ['Nitrogen', 0.78],
+                ['Oxygen', 0.21],
+                ['Other', 0.01]
+            ]);
+
+            // Instantiate and draw the chart.
+            var chart = new google.visualization.PieChart(document.getElementById('myPieChart'));
+            chart.draw(data, null);
+        }
+
+        function drawTableChart() {
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Job Name');
+            data.addColumn('string', 'Resources');
+
+            var rows = [];
+            for (elem in _queue) {
+                if (_queue.hasOwnProperty(elem)) {
+                    var row = [];
+                    console.log(_queue[elem]);
+                    row.push(_queue[elem].name);
+                    var resItem = [];
+                    for (res in _queue[elem].resources) {
+                        if (_queue[elem].resources.hasOwnProperty(res)) {
+                            resItem.push(_queue[elem].resources[res].name);
+                        }
+                    }
+                    row.push(resItem.toString())
+                }
+                rows.push(row);
+                console.log(row);
+            }
+            console.log(rows);
+            data.addRows(rows);
+
+            var table = new google.visualization.Table(document.getElementById('jobTable'));
+            table.draw(data, {showRowNumber: true, width: '100%'});
+        }
+    </script>
+</header>
+<body>
+<h1>Simulator result view</h1>
+<p>Simulation was initiated at {{.Time | formatDate}}</p>
+<p>Current queue structure: {{.Queue | formatQueue}}</p>
+<div id="myPieChart"></div>
+<div id="jobTable"></div>
+</body>
+</html>
