@@ -50,38 +50,12 @@ func ParseData(data []byte, dataType string) (JobQueue, error) {
 		}
 		return queue, err
 	case "json":
-		//Struct only needed to parse json
-		type _parsed struct {
-			Jobs []struct {
-				Name      string `json:"name"`
-				Platform  string `json:"platform"`
-				Duration  int `json:"duration"`
-				Resources []struct {
-					Name string `json:"name"`
-				} `json:"resources"`
-			} `json:"MetaJobs"`
-		}
-		var parsed _parsed
 		//Queue is locked in case some requests come in for scaling before the actual queue is created.
-		if err = json.Unmarshal(data, &parsed); err != nil {
-			log.Print(err)
-			return queue, err
-		}
 		queue.Lock.Lock()
 		defer queue.Lock.Unlock()
-		if queue.JobMap == nil {
-			queue.JobMap = make(map[string]Job)
-		}
-		for _, v := range parsed.Jobs {
-			//Create the Job in the in memory struct
-			queue.JobMap[v.Name] = Job{Name:v.Name,
-				Platform:v.Platform,
-				Duration:v.Duration,
-				Resources:make(map[string]Resource)}
-
-			for _, r := range v.Resources {
-				queue.JobMap[v.Name].Resources[r.Name] = Resource{Name:r.Name}
-			}
+		if err = json.Unmarshal(data, &queue.JobMap); err != nil {
+			log.Print(err)
+			return queue, err
 		}
 		return queue, err
 	default:
